@@ -1,0 +1,7 @@
+/* @import '~normalize.css'; */
+
+@import 'other/media';
+
+h2 {
+  color: blue;
+}

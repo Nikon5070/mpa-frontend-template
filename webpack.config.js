@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
-const autoprefixer = require('autoprefixer');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -22,6 +21,13 @@ const pugGlobals = path.resolve(pug, 'data/global.json');
 module.exports = env => ({
   context: src,
   devtool: 'inline-source-map',
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    host: '0.0.0.0',
+    public: 'localhost:9000',
+    port: 9000
+  },
   resolve: {
     alias: {
       Img: path.resolve(src, 'img/'),
@@ -31,7 +37,7 @@ module.exports = env => ({
   },
   entry: {
     app: './js/main.js',
-    styles: './styl/main.styl',
+    styles: './css/main.css',
     assets: './assets.js'
   },
   output: {
@@ -51,7 +57,7 @@ module.exports = env => ({
         loader: 'babel-loader'
       },
       {
-        test: /\.styl$/,
+        test: /\.css$/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
@@ -67,13 +73,6 @@ module.exports = env => ({
           },
           {
             loader: 'postcss-loader',
-            options: {
-              sourceMap: true,
-              plugins: [autoprefixer]
-            }
-          },
-          {
-            loader: 'stylus-loader',
             options: {
               sourceMap: true
             }
@@ -148,7 +147,7 @@ module.exports = env => ({
   },
   plugins: [
     new FixStyleOnlyEntriesPlugin({
-      extensions: ['styl', 'css']
+      extensions: ['css']
     }),
     new MiniCssExtractPlugin({
       filename: './css/app.css'
