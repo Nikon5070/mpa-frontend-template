@@ -4,13 +4,11 @@ const webpack = require('webpack');
 const autoprefixer = require('autoprefixer');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-const IfPlugin = require('if-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
+const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries');
 
 const src = path.resolve(__dirname, 'src/');
 const dist = path.resolve(__dirname, 'dist/');
@@ -26,7 +24,9 @@ module.exports = env => ({
   devtool: 'inline-source-map',
   resolve: {
     alias: {
-      '@': src
+      Img: path.resolve(src, 'img/'),
+      '@': src,
+      Js: path.resolve(src, 'js/')
     }
   },
   entry: {
@@ -40,6 +40,11 @@ module.exports = env => ({
   },
   module: {
     rules: [
+      {
+        exclude: [/node_modules\/(?!(swiper|dom7)\/).*/, /\.test\.jsx?$/],
+        test: /\.jsx?$/,
+        use: [{ loader: 'babel-loader' }]
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -76,15 +81,18 @@ module.exports = env => ({
         ]
       },
       {
-        test: /\.(gif|png|jpe?g|svg|woff|eot|ttf|woff2)$/,
+        test: /\.(gif|png|jpe?g|svg|woff)$/,
+        include: src,
         exclude: ico,
-        use: [{
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-            name: '[path][name].[ext]'
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+              name: '[path][name].[ext]'
+            }
           }
-        }]
+        ]
       },
       {
         test: /\.svg$/,
@@ -150,23 +158,13 @@ module.exports = env => ({
       jQuery: 'jquery',
       'window.jQuery': 'jquery'
     }),
-    new CopyWebpackPlugin([{
-      from: staticPath,
-      to: dist
-    }]),
-    new CleanWebpackPlugin(dist),
-    new IfPlugin(
-      env === 'server',
-      new BrowserSyncPlugin({
-        host: 'localhost',
-        port: 3000,
-        ghostMode: false,
-        server: {
-          baseDir: [dist]
-        }
-      }, {
-        injectCss: true
-      })
-    )
+    new CopyWebpackPlugin([
+      {
+        context: src,
+        from: path.resolve(src, 'img/**/*'),
+        to: dist
+      }
+    ]),
+    new CleanWebpackPlugin(dist)
   ]
 });
